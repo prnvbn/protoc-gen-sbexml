@@ -1,0 +1,6 @@
+syntax = "proto3";
+package primitives;
+
+message Fixed64Value {
+  fixed64 value = 1;
+}

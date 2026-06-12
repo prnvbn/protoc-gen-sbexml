@@ -1,0 +1,6 @@
+syntax = "proto3";
+package primitives;
+
+message BytesValue {
+  bytes value = 1;
+}

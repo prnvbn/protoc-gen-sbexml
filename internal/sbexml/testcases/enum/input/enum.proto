@@ -1,0 +1,13 @@
+syntax = "proto3";
+package helloworld;
+
+enum GreetingKind {
+  GREETING_KIND_UNSPECIFIED = 0;
+  GREETING_KIND_FORMAL = 1;
+  GREETING_KIND_CASUAL = 2;
+}
+
+message Greeting {
+  GreetingKind kind = 1;
+  string name = 2;
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="helloworld" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <enum name="GreetingKind" encodingType="uint8">
+      <validValue name="GREETING_KIND_UNSPECIFIED">0</validValue>
+      <validValue name="GREETING_KIND_FORMAL">1</validValue>
+      <validValue name="GREETING_KIND_CASUAL">2</validValue>
+    </enum>
+  </types>
+  <message name="Greeting" id="1">
+    <field name="kind" id="1" type="GreetingKind"></field>
+    <field name="name" id="2" type="string"></field>
+  </message>
+</sbe:messageSchema>

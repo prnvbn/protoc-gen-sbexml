@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="primitives" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="fixed32" primitiveType="uint32"></type>
+  </types>
+  <message name="Fixed32Value" id="1">
+    <field name="value" id="1" type="fixed32"></field>
+  </message>
+</sbe:messageSchema>

@@ -1,0 +1,6 @@
+syntax = "proto3";
+package primitives;
+
+message UInt32Value {
+  uint32 value = 1;
+}

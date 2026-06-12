@@ -1,0 +1,6 @@
+syntax = "proto3";
+package primitives;
+
+message SInt32Value {
+  sint32 value = 1;
+}
