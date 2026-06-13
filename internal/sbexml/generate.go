@@ -2,7 +2,9 @@ package sbexml
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
+	"strings"
 
 	"google.golang.org/protobuf/types/descriptorpb"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -10,11 +12,18 @@ import (
 
 const OutputFilename = "output.xml"
 
+var (
+	errFileToGenerateNotFound = errors.New("file to generate not found")
+	errUnsupportedEnumType    = errors.New("unsupported enum type")
+	errUnsupportedMessageType = errors.New("unsupported message type")
+	errUnsupportedFieldType   = errors.New("unsupported field type")
+)
+
 // Generate builds an SBE XML document for the files requested by protoc.
 func Generate(request *pluginpb.CodeGeneratorRequest) (string, error) {
 	g := newGenerator(request)
 	if err := g.generate(); err != nil {
-		return "", err
+		return "", fmt.Errorf("generate schema: %w", err)
 	}
 	return g.xml()
 }
@@ -46,10 +55,10 @@ func (g *generator) generate() error {
 	for _, name := range g.request.FileToGenerate {
 		file, ok := g.files[name]
 		if !ok {
-			return fmt.Errorf("file to generate %q not found in request", name)
+			return fmt.Errorf("%w: %q", errFileToGenerateNotFound, name)
 		}
 		if err := g.addFile(file); err != nil {
-			return err
+			return fmt.Errorf("add file %q: %w", name, err)
 		}
 	}
 	return nil
@@ -60,15 +69,15 @@ func (g *generator) addFile(file *descriptorpb.FileDescriptorProto) error {
 		g.schema.Package = file.GetPackage()
 	}
 
-	enumNames := enumNames(file.GetPackage(), file.EnumType)
-	for _, enum := range file.EnumType {
+	types := indexFileTypes(file)
+	for _, enum := range types.enums {
 		g.schema.Types.Enums = append(g.schema.Types.Enums, buildEnum(enum))
 	}
 
-	for _, message := range file.MessageType {
-		built, err := g.buildMessage(message, enumNames)
+	for _, message := range types.messages {
+		built, err := g.buildMessage(message, types)
 		if err != nil {
-			return err
+			return fmt.Errorf("build message %q: %w", message.name, err)
 		}
 		g.schema.Messages = append(g.schema.Messages, built)
 		g.nextMessageID++
@@ -77,16 +86,16 @@ func (g *generator) addFile(file *descriptorpb.FileDescriptorProto) error {
 	return nil
 }
 
-func (g *generator) buildMessage(message *descriptorpb.DescriptorProto, enumNames map[string]string) (messageType, error) {
+func (g *generator) buildMessage(message indexedMessage, types fileTypes) (messageType, error) {
 	result := messageType{
-		Name: message.GetName(),
+		Name: message.name,
 		ID:   g.nextMessageID,
 	}
 
-	for _, field := range message.Field {
-		fieldType, err := g.fieldType(message, field, enumNames)
+	for _, field := range message.descriptor.Field {
+		fieldType, err := g.fieldType(message, field, types)
 		if err != nil {
-			return messageType{}, err
+			return messageType{}, fmt.Errorf("resolve field %q: %w", field.GetName(), err)
 		}
 		result.Fields = append(result.Fields, fieldTypeXML{
 			Name: field.GetName(),
@@ -106,13 +115,13 @@ func (g *generator) xml() (string, error) {
 	return xml.Header + string(data) + "\n", nil
 }
 
-func buildEnum(enum *descriptorpb.EnumDescriptorProto) enumType {
+func buildEnum(enum indexedEnum) enumType {
 	result := enumType{
-		Name:         enum.GetName(),
+		Name:         enum.name,
 		EncodingType: "uint8",
 	}
 
-	for _, value := range enum.Value {
+	for _, value := range enum.descriptor.Value {
 		result.Values = append(result.Values, validValue{
 			Name:  value.GetName(),
 			Value: value.GetNumber(),
@@ -122,21 +131,28 @@ func buildEnum(enum *descriptorpb.EnumDescriptorProto) enumType {
 	return result
 }
 
-func (g *generator) fieldType(message *descriptorpb.DescriptorProto, field *descriptorpb.FieldDescriptorProto, enumNames map[string]string) (string, error) {
-	if field.GetType() == descriptorpb.FieldDescriptorProto_TYPE_ENUM {
-		name, ok := enumNames[field.GetTypeName()]
+func (g *generator) fieldType(message indexedMessage, field *descriptorpb.FieldDescriptorProto, types fileTypes) (string, error) {
+	switch field.GetType() {
+	case descriptorpb.FieldDescriptorProto_TYPE_ENUM:
+		name, ok := types.enumNames[field.GetTypeName()]
 		if !ok {
-			return "", fmt.Errorf("unsupported enum type %s for %s.%s", field.GetTypeName(), message.GetName(), field.GetName())
+			return "", fmt.Errorf("%w: %s for %s.%s", errUnsupportedEnumType, field.GetTypeName(), message.name, field.GetName())
 		}
 		return name, nil
+	case descriptorpb.FieldDescriptorProto_TYPE_MESSAGE:
+		name, ok := types.messageNames[field.GetTypeName()]
+		if !ok {
+			return "", fmt.Errorf("%w: %s for %s.%s", errUnsupportedMessageType, field.GetTypeName(), message.name, field.GetName())
+		}
+		return name, nil
+	default:
+		primitive, ok := protoPrimitiveTypes[field.GetType()]
+		if !ok {
+			return "", fmt.Errorf("%w: %s for %s.%s", errUnsupportedFieldType, field.GetType(), message.name, field.GetName())
+		}
+		g.addPrimitive(primitive)
+		return primitive.Name, nil
 	}
-
-	primitive, ok := protoPrimitiveTypes[field.GetType()]
-	if !ok {
-		return "", fmt.Errorf("unsupported field type %s for %s.%s", field.GetType(), message.GetName(), field.GetName())
-	}
-	g.addPrimitive(primitive)
-	return primitive.Name, nil
 }
 
 func (g *generator) addPrimitive(primitive primitiveType) {
@@ -147,15 +163,80 @@ func (g *generator) addPrimitive(primitive primitiveType) {
 	g.schema.Types.Primitives = append(g.schema.Types.Primitives, primitive)
 }
 
-func enumNames(packageName string, enums []*descriptorpb.EnumDescriptorProto) map[string]string {
-	names := make(map[string]string, len(enums))
-	for _, enum := range enums {
-		names[fullName(packageName, enum.GetName())] = enum.GetName()
-	}
-	return names
+type fileTypes struct {
+	enumNames    map[string]string
+	messageNames map[string]string
+	enums        []indexedEnum
+	messages     []indexedMessage
 }
 
-func fullName(packageName, name string) string {
+type indexedEnum struct {
+	descriptor *descriptorpb.EnumDescriptorProto
+	name       string
+}
+
+type indexedMessage struct {
+	descriptor *descriptorpb.DescriptorProto
+	name       string
+}
+
+func indexFileTypes(file *descriptorpb.FileDescriptorProto) fileTypes {
+	types := fileTypes{
+		enumNames:    map[string]string{},
+		messageNames: map[string]string{},
+	}
+
+	for _, enum := range file.EnumType {
+		types.addEnum(file.GetPackage(), nil, enum)
+	}
+	for _, message := range file.MessageType {
+		types.addMessage(file.GetPackage(), nil, message)
+	}
+
+	return types
+}
+
+func (types *fileTypes) addEnum(packageName string, parentPath []string, enum *descriptorpb.EnumDescriptorProto) {
+	path := appendPath(parentPath, enum.GetName())
+	name := xmlTypeName(path)
+
+	types.enumNames[protoFullName(packageName, path)] = name
+	types.enums = append(types.enums, indexedEnum{
+		descriptor: enum,
+		name:       name,
+	})
+}
+
+func (types *fileTypes) addMessage(packageName string, parentPath []string, message *descriptorpb.DescriptorProto) {
+	path := appendPath(parentPath, message.GetName())
+	name := xmlTypeName(path)
+
+	types.messageNames[protoFullName(packageName, path)] = name
+	types.messages = append(types.messages, indexedMessage{
+		descriptor: message,
+		name:       name,
+	})
+
+	for _, enum := range message.EnumType {
+		types.addEnum(packageName, path, enum)
+	}
+	for _, nested := range message.NestedType {
+		types.addMessage(packageName, path, nested)
+	}
+}
+
+func appendPath(path []string, name string) []string {
+	next := make([]string, 0, len(path)+1)
+	next = append(next, path...)
+	return append(next, name)
+}
+
+func xmlTypeName(path []string) string {
+	return strings.Join(path, "_")
+}
+
+func protoFullName(packageName string, path []string) string {
+	name := strings.Join(path, ".")
 	if packageName == "" {
 		return "." + name
 	}

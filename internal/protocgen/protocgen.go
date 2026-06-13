@@ -32,12 +32,12 @@ func Run(in io.Reader, out io.Writer) error {
 func Generate(in io.Reader) (*pluginpb.CodeGeneratorResponse, error) {
 	request, err := readRequest(in)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read code generator request: %w", err)
 	}
 
 	content, err := sbexml.Generate(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("generate SBE XML: %w", err)
 	}
 
 	return &pluginpb.CodeGeneratorResponse{

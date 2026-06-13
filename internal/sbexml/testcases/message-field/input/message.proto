@@ -1,0 +1,10 @@
+syntax = "proto3";
+package people;
+
+message Address {
+  string city = 1;
+}
+
+message Person {
+  Address address = 1;
+}
