@@ -11,8 +11,26 @@ func (g *generator) buildMessage(message indexedMessage, types fileTypes) (messa
 		Name: message.name,
 		ID:   g.nextMessageID,
 	}
+	oneofs := indexOneofs(message.descriptor)
 
 	for _, field := range message.descriptor.Field {
+		if isOneofField(field) {
+			oneof, ok := oneofs.byIndex[int(field.GetOneofIndex())]
+			if !ok {
+				return messageType{}, fmt.Errorf("%w: %s.%s", errOneofDeclarationNotFound, message.name, field.GetName())
+			}
+			if oneofs.emitted(oneof.index) {
+				continue
+			}
+
+			built, err := g.buildOneof(message, oneof, types)
+			if err != nil {
+				return messageType{}, fmt.Errorf("resolve oneof %q: %w", oneof.name, err)
+			}
+			result.Fields = append(result.Fields, built)
+			continue
+		}
+
 		if field.GetLabel() == descriptorpb.FieldDescriptorProto_LABEL_REPEATED {
 			group, err := g.buildGroup(message, field, types)
 			if err != nil {

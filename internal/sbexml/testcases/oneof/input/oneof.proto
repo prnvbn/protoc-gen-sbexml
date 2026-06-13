@@ -1,0 +1,19 @@
+syntax = "proto3";
+package contacts;
+
+enum DeliveryKind {
+  DELIVERY_KIND_UNSPECIFIED = 0;
+  DELIVERY_KIND_HOME = 1;
+}
+
+message Address {
+  string city = 1;
+}
+
+message Contact {
+  oneof destination {
+    string email = 1;
+    Address address = 2;
+    DeliveryKind kind = 3;
+  }
+}

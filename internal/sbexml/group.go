@@ -30,10 +30,10 @@ func (g *generator) buildGroup(message indexedMessage, field *descriptorpb.Field
 }
 
 func (g *generator) addGroupSizeEncoding() {
-	if _, ok := g.groups[groupSizeEncodingType]; ok {
+	if _, ok := g.composites[groupSizeEncodingType]; ok {
 		return
 	}
-	g.groups[groupSizeEncodingType] = struct{}{}
+	g.composites[groupSizeEncodingType] = struct{}{}
 	g.schema.Types.Composites = append(g.schema.Types.Composites, compositeType{
 		Name: groupSizeEncodingType,
 		Types: []primitiveType{

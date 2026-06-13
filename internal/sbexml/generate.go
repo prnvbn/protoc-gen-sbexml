@@ -24,7 +24,7 @@ type generator struct {
 	schema        messageSchema
 	files         map[string]*descriptorpb.FileDescriptorProto
 	primitives    map[string]struct{}
-	groups        map[string]struct{}
+	composites    map[string]struct{}
 	nextMessageID int
 }
 
@@ -39,7 +39,7 @@ func newGenerator(request *pluginpb.CodeGeneratorRequest) *generator {
 		schema:        newMessageSchema(),
 		files:         files,
 		primitives:    map[string]struct{}{},
-		groups:        map[string]struct{}{},
+		composites:    map[string]struct{}{},
 		nextMessageID: 1,
 	}
 }

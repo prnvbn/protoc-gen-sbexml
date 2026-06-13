@@ -35,8 +35,9 @@ type primitiveType struct {
 }
 
 type compositeType struct {
-	Name  string          `xml:"name,attr"`
-	Types []primitiveType `xml:"type"`
+	Name   string          `xml:"name,attr"`
+	Types  []primitiveType `xml:"type"`
+	Fields []fieldTypeXML  `xml:"field"`
 }
 
 type enumType struct {
