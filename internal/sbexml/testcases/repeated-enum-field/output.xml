@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="repeated" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+    <enum name="Status" encodingType="uint8">
+      <validValue name="STATUS_UNSPECIFIED">0</validValue>
+      <validValue name="STATUS_ACTIVE">1</validValue>
+    </enum>
+  </types>
+  <message name="Statuses" id="1">
+    <group name="values" id="1" dimensionType="groupSizeEncoding">
+      <field name="value" id="1" type="Status"></field>
+    </group>
+  </message>
+</sbe:messageSchema>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="repeated" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+  </types>
+  <message name="Address" id="1">
+    <field name="city" id="1" type="string"></field>
+  </message>
+  <message name="Person" id="2">
+    <group name="addresses" id="1" dimensionType="groupSizeEncoding">
+      <field name="value" id="1" type="Address"></field>
+    </group>
+  </message>
+</sbe:messageSchema>

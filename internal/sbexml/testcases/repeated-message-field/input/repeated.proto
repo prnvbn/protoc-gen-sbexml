@@ -1,0 +1,10 @@
+syntax = "proto3";
+package repeated;
+
+message Address {
+  string city = 1;
+}
+
+message Person {
+  repeated Address addresses = 1;
+}

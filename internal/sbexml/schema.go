@@ -24,6 +24,7 @@ type messageSchema struct {
 
 type typeSection struct {
 	Primitives []primitiveType `xml:"type"`
+	Composites []compositeType `xml:"composite"`
 	Enums      []enumType      `xml:"enum"`
 }
 
@@ -31,6 +32,11 @@ type primitiveType struct {
 	Name              string `xml:"name,attr"`
 	PrimitiveType     string `xml:"primitiveType,attr"`
 	CharacterEncoding string `xml:"characterEncoding,attr,omitempty"`
+}
+
+type compositeType struct {
+	Name  string          `xml:"name,attr"`
+	Types []primitiveType `xml:"type"`
 }
 
 type enumType struct {
@@ -48,10 +54,18 @@ type messageType struct {
 	Name   string         `xml:"name,attr"`
 	ID     int            `xml:"id,attr"`
 	Fields []fieldTypeXML `xml:"field"`
+	Groups []groupType    `xml:"group"`
 }
 
 type fieldTypeXML struct {
 	Name string `xml:"name,attr"`
 	ID   int    `xml:"id,attr"`
 	Type string `xml:"type,attr"`
+}
+
+type groupType struct {
+	Name          string         `xml:"name,attr"`
+	ID            int            `xml:"id,attr"`
+	DimensionType string         `xml:"dimensionType,attr"`
+	Fields        []fieldTypeXML `xml:"field"`
 }

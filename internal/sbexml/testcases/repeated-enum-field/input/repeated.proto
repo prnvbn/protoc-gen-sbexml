@@ -1,0 +1,11 @@
+syntax = "proto3";
+package repeated;
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_ACTIVE = 1;
+}
+
+message Statuses {
+  repeated Status values = 1;
+}
