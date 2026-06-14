@@ -1,6 +1,6 @@
 # protoc-gen-sbexml
 
-`protoc-gen-sbexml` is a `protoc` plugin that generates Simple Binary Encoding XML from protobuf descriptors.
+`protoc-gen-sbexml` is a `protoc` plugin that generates [Simple Binary Encoding](https://github.com/aeron-io/simple-binary-encoding) XML from protobuf descriptors.
 
 ## Installation
 
