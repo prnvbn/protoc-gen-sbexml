@@ -42,7 +42,7 @@ go build -o /usr/local/bin/protoc-gen-sbexml ./cmd/protoc-gen-sbexml
 - [x] oneof fields
 - [x] imports and cross-file type references
 - [x] maps
-- [ ] proto3 `optional`
+- [x] proto3 `optional`
 - [ ] reserved fields
 - [ ] well known types
 - [ ] additional proto annotations (to support better memory efficieny)

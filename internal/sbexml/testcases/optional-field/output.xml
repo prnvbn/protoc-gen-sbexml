@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="optionalfields" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <type name="int32" primitiveType="int32"></type>
+    <enum name="Status" encodingType="uint8">
+      <validValue name="STATUS_UNSPECIFIED">0</validValue>
+      <validValue name="STATUS_ACTIVE">1</validValue>
+    </enum>
+  </types>
+  <message name="User" id="1">
+    <field name="name" id="1" type="string" presence="optional"></field>
+    <field name="age" id="2" type="int32" presence="optional"></field>
+    <field name="status" id="3" type="Status" presence="optional"></field>
+    <field name="city" id="4" type="string"></field>
+  </message>
+</sbe:messageSchema>

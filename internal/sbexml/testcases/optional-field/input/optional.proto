@@ -1,0 +1,14 @@
+syntax = "proto3";
+package optionalfields;
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_ACTIVE = 1;
+}
+
+message User {
+  optional string name = 1;
+  optional int32 age = 2;
+  optional Status status = 3;
+  string city = 4;
+}

@@ -45,13 +45,21 @@ func (g *generator) buildMessage(im indexedMessage, ti typeIndex) (messageType, 
 			return messageType{}, fmt.Errorf("resolve field %q: %w", field.GetName(), err)
 		}
 		result.Fields = append(result.Fields, fieldTypeXML{
-			Name: field.GetName(),
-			ID:   int(field.GetNumber()),
-			Type: fieldType,
+			Name:     field.GetName(),
+			ID:       int(field.GetNumber()),
+			Type:     fieldType,
+			Presence: fieldPresence(field),
 		})
 	}
 
 	return result, nil
+}
+
+func fieldPresence(field *descriptorpb.FieldDescriptorProto) string {
+	if field.GetProto3Optional() {
+		return "optional"
+	}
+	return ""
 }
 
 func (g *generator) fieldType(im indexedMessage, field *descriptorpb.FieldDescriptorProto, ti typeIndex) (string, error) {
