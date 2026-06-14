@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="maps" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <type name="int32" primitiveType="int32"></type>
+    <type name="uint32" primitiveType="uint32"></type>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+    <enum name="Status" encodingType="uint8">
+      <validValue name="STATUS_UNSPECIFIED">0</validValue>
+      <validValue name="STATUS_ACTIVE">1</validValue>
+    </enum>
+  </types>
+  <message name="Address" id="1">
+    <field name="city" id="1" type="string"></field>
+  </message>
+  <message name="Directory" id="2">
+    <group name="scores" id="1" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="string"></field>
+      <field name="value" id="2" type="int32"></field>
+    </group>
+    <group name="addresses" id="2" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="uint32"></field>
+      <field name="value" id="2" type="Address"></field>
+    </group>
+    <group name="statuses" id="3" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="string"></field>
+      <field name="value" id="2" type="Status"></field>
+    </group>
+  </message>
+</sbe:messageSchema>
