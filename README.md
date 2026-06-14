@@ -27,22 +27,3 @@ go build -o /usr/local/bin/protoc-gen-sbexml ./cmd/protoc-gen-sbexml
 ```
 
 `protoc` discovers plugins by name, so make sure the installed `protoc-gen-sbexml` binary is available in your `PATH`.
-
-## WIP Status
-
-> [!WARNING]
->
-> This generator is a work in progress. The XML output is intentionally minimal while the proto-to-SBE mapping is still being designed.
-
-- [x] proto3 descriptor input through `protoc`
-- [x] packages, top-level messages, and nested messages
-- [x] top-level enums, nested enums, and enum fields
-- [x] scalar primitive fields
-- [x] repeated primitive, enum, and message fields
-- [x] oneof fields
-- [x] imports and cross-file type references
-- [x] maps
-- [x] proto3 `optional`
-- [x] `google.protobuf.Timestamp`
-- [ ] other well known types
-- [ ] additional proto annotations (to support better memory efficieny)

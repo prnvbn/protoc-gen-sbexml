@@ -40,7 +40,9 @@ func Generate(in io.Reader) (*pluginpb.CodeGeneratorResponse, error) {
 		return nil, fmt.Errorf("generate SBE XML: %w", err)
 	}
 
+	supportedFeatures := uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
 	return &pluginpb.CodeGeneratorResponse{
+		SupportedFeatures: &supportedFeatures,
 		File: []*pluginpb.CodeGeneratorResponse_File{
 			{
 				Name:    new(sbexml.OutputFilename),
