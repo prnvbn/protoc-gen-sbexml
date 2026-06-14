@@ -1,0 +1,17 @@
+syntax = "proto3";
+package timestamps;
+
+import "google/protobuf/timestamp.proto";
+
+message Event {
+  google.protobuf.Timestamp created_at = 1;
+  optional google.protobuf.Timestamp updated_at = 2;
+  repeated google.protobuf.Timestamp history = 3;
+
+  oneof event_time {
+    google.protobuf.Timestamp scheduled_at = 4;
+    string manual_time = 5;
+  }
+
+  map<string, google.protobuf.Timestamp> timestamps_by_name = 6;
+}

@@ -43,6 +43,6 @@ go build -o /usr/local/bin/protoc-gen-sbexml ./cmd/protoc-gen-sbexml
 - [x] imports and cross-file type references
 - [x] maps
 - [x] proto3 `optional`
-- [ ] reserved fields
-- [ ] well known types
+- [x] `google.protobuf.Timestamp`
+- [ ] other well known types
 - [ ] additional proto annotations (to support better memory efficieny)

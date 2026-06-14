@@ -17,7 +17,7 @@ func (g *generator) buildGroup(im indexedMessage, field *descriptorpb.FieldDescr
 		return g.buildMapGroup(field, mapEntry, ti)
 	}
 
-	fieldType, err := g.fieldType(im, field, ti)
+	valueField, err := g.buildField(im, field, repeatedValueName, repeatedValueFieldID, ti)
 	if err != nil {
 		return groupType{}, err
 	}
@@ -27,28 +27,18 @@ func (g *generator) buildGroup(im indexedMessage, field *descriptorpb.FieldDescr
 		Name:          field.GetName(),
 		ID:            int(field.GetNumber()),
 		DimensionType: groupSizeEncodingType,
-		Fields: []fieldTypeXML{
-			{
-				Name: repeatedValueName,
-				ID:   repeatedValueFieldID,
-				Type: fieldType,
-			},
-		},
+		Fields:        []fieldTypeXML{valueField},
 	}, nil
 }
 
 func (g *generator) buildMapGroup(field *descriptorpb.FieldDescriptorProto, mapEntry indexedMessage, ti typeIndex) (groupType, error) {
 	fields := make([]fieldTypeXML, 0, len(mapEntry.descriptor.Field))
 	for _, entryField := range mapEntry.descriptor.Field {
-		fieldType, err := g.fieldType(mapEntry, entryField, ti)
+		built, err := g.buildField(mapEntry, entryField, entryField.GetName(), int(entryField.GetNumber()), ti)
 		if err != nil {
 			return groupType{}, fmt.Errorf("resolve map entry field %q: %w", entryField.GetName(), err)
 		}
-		fields = append(fields, fieldTypeXML{
-			Name: entryField.GetName(),
-			ID:   int(entryField.GetNumber()),
-			Type: fieldType,
-		})
+		fields = append(fields, built)
 	}
 
 	g.addGroupSizeEncoding()

@@ -40,18 +40,33 @@ func (g *generator) buildMessage(im indexedMessage, ti typeIndex) (messageType, 
 			continue
 		}
 
-		fieldType, err := g.fieldType(im, field, ti)
+		built, err := g.buildField(im, field, field.GetName(), int(field.GetNumber()), ti)
 		if err != nil {
 			return messageType{}, fmt.Errorf("resolve field %q: %w", field.GetName(), err)
 		}
-		result.Fields = append(result.Fields, fieldTypeXML{
-			Name:     field.GetName(),
-			ID:       int(field.GetNumber()),
-			Type:     fieldType,
-			Presence: fieldPresence(field),
-		})
+		result.Fields = append(result.Fields, built)
 	}
 
+	return result, nil
+}
+
+func (g *generator) buildField(im indexedMessage, field *descriptorpb.FieldDescriptorProto, name string, id int, ti typeIndex) (fieldTypeXML, error) {
+	fieldType, err := g.fieldType(im, field, ti)
+	if err != nil {
+		return fieldTypeXML{}, err
+	}
+
+	result := fieldTypeXML{
+		Name:     name,
+		ID:       id,
+		Type:     fieldType,
+		Presence: fieldPresence(field),
+	}
+	if isTimestampField(field) {
+		result.SemanticType = timestampTypeName
+		result.Epoch = timestampEpoch
+		result.TimeUnit = timestampTimeUnit
+	}
 	return result, nil
 }
 
@@ -71,6 +86,11 @@ func (g *generator) fieldType(im indexedMessage, field *descriptorpb.FieldDescri
 		}
 		return enum.name, nil
 	case descriptorpb.FieldDescriptorProto_TYPE_MESSAGE:
+		if isTimestampField(field) {
+			g.addTimestampType()
+			return timestampTypeName, nil
+		}
+
 		referenced, ok := ti.messageByName[field.GetTypeName()]
 		if !ok {
 			return "", fmt.Errorf("%w: %s for %s.%s", errUnsupportedMessageType, field.GetTypeName(), im.name, field.GetName())

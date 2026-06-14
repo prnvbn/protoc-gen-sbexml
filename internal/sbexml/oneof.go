@@ -63,15 +63,11 @@ func (g *generator) buildOneof(im indexedMessage, oneof oneofFields, ti typeInde
 	fields := make([]fieldTypeXML, 0, len(oneof.fields))
 
 	for _, field := range oneof.fields {
-		fieldType, err := g.fieldType(im, field, ti)
+		built, err := g.buildField(im, field, field.GetName(), int(field.GetNumber()), ti)
 		if err != nil {
 			return fieldTypeXML{}, fmt.Errorf("resolve option %q: %w", field.GetName(), err)
 		}
-		fields = append(fields, fieldTypeXML{
-			Name: field.GetName(),
-			ID:   int(field.GetNumber()),
-			Type: fieldType,
-		})
+		fields = append(fields, built)
 	}
 
 	g.addOneofComposite(compositeName, fields)

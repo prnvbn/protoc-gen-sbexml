@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="timestamps" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="UTCTimestamp" primitiveType="uint64"></type>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+    <composite name="Event_event_time">
+      <field name="scheduled_at" id="4" type="UTCTimestamp" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+      <field name="manual_time" id="5" type="string"></field>
+    </composite>
+  </types>
+  <message name="Event" id="1">
+    <field name="created_at" id="1" type="UTCTimestamp" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+    <field name="updated_at" id="2" type="UTCTimestamp" presence="optional" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+    <field name="event_time" id="4" type="Event_event_time"></field>
+    <group name="history" id="3" dimensionType="groupSizeEncoding">
+      <field name="value" id="1" type="UTCTimestamp" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+    </group>
+    <group name="timestamps_by_name" id="6" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="string"></field>
+      <field name="value" id="2" type="UTCTimestamp" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+    </group>
+  </message>
+</sbe:messageSchema>

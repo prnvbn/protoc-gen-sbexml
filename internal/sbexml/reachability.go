@@ -64,6 +64,10 @@ func (reachable *reachableTypes) markFieldTypes(im indexedMessage, field *descri
 		}
 		reachable.markEnum(enum.fullName)
 	case descriptorpb.FieldDescriptorProto_TYPE_MESSAGE:
+		if isTimestampField(field) {
+			return nil
+		}
+
 		if mapEntry, ok := ti.mapEntryMessages[field.GetTypeName()]; ok {
 			for _, entryField := range mapEntry.descriptor.Field {
 				if err := reachable.markFieldTypes(mapEntry, entryField, ti); err != nil {

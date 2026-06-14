@@ -59,10 +59,13 @@ type messageType struct {
 }
 
 type fieldTypeXML struct {
-	Name     string `xml:"name,attr"`
-	ID       int    `xml:"id,attr"`
-	Type     string `xml:"type,attr"`
-	Presence string `xml:"presence,attr,omitempty"`
+	Name         string `xml:"name,attr"`
+	ID           int    `xml:"id,attr"`
+	Type         string `xml:"type,attr"`
+	Presence     string `xml:"presence,attr,omitempty"`
+	SemanticType string `xml:"semanticType,attr,omitempty"`
+	Epoch        string `xml:"epoch,attr,omitempty"`
+	TimeUnit     string `xml:"timeUnit,attr,omitempty"`
 }
 
 type groupType struct {
