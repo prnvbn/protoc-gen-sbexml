@@ -12,12 +12,12 @@ const (
 	repeatedValueName     = "value"
 )
 
-func (g *generator) buildGroup(message indexedMessage, field *descriptorpb.FieldDescriptorProto, types fileTypes) (groupType, error) {
-	if mapEntry, ok := types.mapEntryMessages[field.GetTypeName()]; ok {
-		return g.buildMapGroup(field, mapEntry, types)
+func (g *generator) buildGroup(im indexedMessage, field *descriptorpb.FieldDescriptorProto, ti typeIndex) (groupType, error) {
+	if mapEntry, ok := ti.mapEntryMessages[field.GetTypeName()]; ok {
+		return g.buildMapGroup(field, mapEntry, ti)
 	}
 
-	fieldType, err := g.fieldType(message, field, types)
+	fieldType, err := g.fieldType(im, field, ti)
 	if err != nil {
 		return groupType{}, err
 	}
@@ -37,10 +37,10 @@ func (g *generator) buildGroup(message indexedMessage, field *descriptorpb.Field
 	}, nil
 }
 
-func (g *generator) buildMapGroup(field *descriptorpb.FieldDescriptorProto, mapEntry indexedMessage, types fileTypes) (groupType, error) {
+func (g *generator) buildMapGroup(field *descriptorpb.FieldDescriptorProto, mapEntry indexedMessage, ti typeIndex) (groupType, error) {
 	fields := make([]fieldTypeXML, 0, len(mapEntry.descriptor.Field))
 	for _, entryField := range mapEntry.descriptor.Field {
-		fieldType, err := g.fieldType(mapEntry, entryField, types)
+		fieldType, err := g.fieldType(mapEntry, entryField, ti)
 		if err != nil {
 			return groupType{}, fmt.Errorf("resolve map entry field %q: %w", entryField.GetName(), err)
 		}

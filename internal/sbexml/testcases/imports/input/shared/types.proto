@@ -1,0 +1,24 @@
+syntax = "proto3";
+package shared;
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_ACTIVE = 1;
+}
+
+enum UnusedStatus {
+  UNUSED_STATUS_UNSPECIFIED = 0;
+}
+
+message Address {
+  string city = 1;
+}
+
+message User {
+  string name = 1;
+  Address address = 2;
+}
+
+message Unused {
+  string value = 1;
+}

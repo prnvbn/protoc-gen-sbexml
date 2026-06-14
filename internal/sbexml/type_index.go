@@ -6,76 +6,91 @@ import (
 	"google.golang.org/protobuf/types/descriptorpb"
 )
 
-type fileTypes struct {
-	enumNames        map[string]string
-	messageNames     map[string]string
-	mapEntryMessages map[string]indexedMessage
+type typeIndex struct {
 	enums            []indexedEnum
 	messages         []indexedMessage
+	enumByName       map[string]indexedEnum
+	messageByName    map[string]indexedMessage
+	mapEntryMessages map[string]indexedMessage
 }
 
 type indexedEnum struct {
 	descriptor *descriptorpb.EnumDescriptorProto
 	name       string
+	fullName   string
+	fileName   string
 }
 
 type indexedMessage struct {
 	descriptor *descriptorpb.DescriptorProto
 	name       string
+	fullName   string
+	fileName   string
 }
 
-func indexFileTypes(file *descriptorpb.FileDescriptorProto) fileTypes {
-	types := fileTypes{
-		enumNames:        map[string]string{},
-		messageNames:     map[string]string{},
+func indexTypes(files []*descriptorpb.FileDescriptorProto) typeIndex {
+	ti := typeIndex{
+		enumByName:       map[string]indexedEnum{},
+		messageByName:    map[string]indexedMessage{},
 		mapEntryMessages: map[string]indexedMessage{},
 	}
 
+	for _, file := range files {
+		ti.addFile(file)
+	}
+
+	return ti
+}
+
+func (ti *typeIndex) addFile(file *descriptorpb.FileDescriptorProto) {
 	for _, enum := range file.EnumType {
-		types.addEnum(file.GetPackage(), nil, enum)
+		ti.addEnum(file.GetName(), file.GetPackage(), nil, enum)
 	}
 	for _, message := range file.MessageType {
-		types.addMessage(file.GetPackage(), nil, message)
+		ti.addMessage(file.GetName(), file.GetPackage(), nil, message)
 	}
-
-	return types
 }
 
-func (types *fileTypes) addEnum(packageName string, parentPath []string, enum *descriptorpb.EnumDescriptorProto) {
+func (ti *typeIndex) addEnum(fileName string, packageName string, parentPath []string, enum *descriptorpb.EnumDescriptorProto) {
 	path := appendPath(parentPath, enum.GetName())
 	name := xmlTypeName(path)
+	fullName := protoFullName(packageName, path)
 
-	types.enumNames[protoFullName(packageName, path)] = name
-	types.enums = append(types.enums, indexedEnum{
+	indexed := indexedEnum{
 		descriptor: enum,
 		name:       name,
-	})
+		fullName:   fullName,
+		fileName:   fileName,
+	}
+	ti.enumByName[fullName] = indexed
+	ti.enums = append(ti.enums, indexed)
 }
 
-func (types *fileTypes) addMessage(packageName string, parentPath []string, message *descriptorpb.DescriptorProto) {
+func (ti *typeIndex) addMessage(fileName string, packageName string, parentPath []string, message *descriptorpb.DescriptorProto) {
 	path := appendPath(parentPath, message.GetName())
 	name := xmlTypeName(path)
 	fullName := protoFullName(packageName, path)
 
+	indexed := indexedMessage{
+		descriptor: message,
+		name:       name,
+		fullName:   fullName,
+		fileName:   fileName,
+	}
+
 	if isMapEntry(message) {
-		types.mapEntryMessages[fullName] = indexedMessage{
-			descriptor: message,
-			name:       name,
-		}
+		ti.mapEntryMessages[fullName] = indexed
 		return
 	}
 
-	types.messageNames[fullName] = name
-	types.messages = append(types.messages, indexedMessage{
-		descriptor: message,
-		name:       name,
-	})
+	ti.messageByName[fullName] = indexed
+	ti.messages = append(ti.messages, indexed)
 
 	for _, enum := range message.EnumType {
-		types.addEnum(packageName, path, enum)
+		ti.addEnum(fileName, packageName, path, enum)
 	}
 	for _, nested := range message.NestedType {
-		types.addMessage(packageName, path, nested)
+		ti.addMessage(fileName, packageName, path, nested)
 	}
 }
 

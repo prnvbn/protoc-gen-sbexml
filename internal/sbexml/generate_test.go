@@ -65,7 +65,7 @@ type testCase struct {
 func compileProtoCase(t *testing.T, inputDir string) *pluginpb.CodeGeneratorRequest {
 	t.Helper()
 
-	protoFiles := protoFilesIn(t, inputDir)
+	protoFiles := protoFilesToGenerateIn(t, inputDir)
 	descriptorPath := filepath.Join(t.TempDir(), "descriptor.pb")
 
 	args := []string{
@@ -91,25 +91,21 @@ func compileProtoCase(t *testing.T, inputDir string) *pluginpb.CodeGeneratorRequ
 	}
 }
 
-func protoFilesIn(t *testing.T, inputDir string) []string {
+func protoFilesToGenerateIn(t *testing.T, inputDir string) []string {
 	t.Helper()
 
 	var protoFiles []string
-	err := filepath.WalkDir(inputDir, func(path string, entry os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if entry.IsDir() || filepath.Ext(path) != ".proto" {
-			return nil
-		}
-		rel, err := filepath.Rel(inputDir, path)
-		if err != nil {
-			return err
-		}
-		protoFiles = append(protoFiles, rel)
-		return nil
-	})
+	entries, err := os.ReadDir(inputDir)
 	require.NoError(t, err)
+
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".proto" {
+			continue
+		}
+		protoFiles = append(protoFiles, entry.Name())
+	}
+
+	require.NotEmpty(t, protoFiles, "no root .proto files found in %s", inputDir)
 	slices.Sort(protoFiles)
 	return protoFiles
 }

@@ -58,12 +58,12 @@ func (oneofs oneofIndex) emitted(index int) bool {
 	return false
 }
 
-func (g *generator) buildOneof(message indexedMessage, oneof oneofFields, types fileTypes) (fieldTypeXML, error) {
-	compositeName := xmlTypeName([]string{message.name, oneof.name})
+func (g *generator) buildOneof(im indexedMessage, oneof oneofFields, ti typeIndex) (fieldTypeXML, error) {
+	compositeName := xmlTypeName([]string{im.name, oneof.name})
 	fields := make([]fieldTypeXML, 0, len(oneof.fields))
 
 	for _, field := range oneof.fields {
-		fieldType, err := g.fieldType(message, field, types)
+		fieldType, err := g.fieldType(im, field, ti)
 		if err != nil {
 			return fieldTypeXML{}, fmt.Errorf("resolve option %q: %w", field.GetName(), err)
 		}

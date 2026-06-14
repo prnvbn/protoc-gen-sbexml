@@ -40,7 +40,7 @@ go build -o /usr/local/bin/protoc-gen-sbexml ./cmd/protoc-gen-sbexml
 - [x] scalar primitive fields
 - [x] repeated primitive, enum, and message fields
 - [x] oneof fields
-- [ ] imports and cross-file type references
+- [x] imports and cross-file type references
 - [x] maps
 - [ ] proto3 `optional`
 - [ ] reserved fields

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="app" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+    <enum name="Status" encodingType="uint8">
+      <validValue name="STATUS_UNSPECIFIED">0</validValue>
+      <validValue name="STATUS_ACTIVE">1</validValue>
+    </enum>
+  </types>
+  <message name="Event" id="1">
+    <field name="user" id="1" type="User"></field>
+    <field name="status" id="3" type="Status"></field>
+    <group name="previous_addresses" id="2" dimensionType="groupSizeEncoding">
+      <field name="value" id="1" type="Address"></field>
+    </group>
+    <group name="address_by_label" id="4" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="string"></field>
+      <field name="value" id="2" type="Address"></field>
+    </group>
+  </message>
+  <message name="Address" id="2">
+    <field name="city" id="1" type="string"></field>
+  </message>
+  <message name="User" id="3">
+    <field name="name" id="1" type="string"></field>
+    <field name="address" id="2" type="Address"></field>
+  </message>
+</sbe:messageSchema>

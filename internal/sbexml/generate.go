@@ -45,30 +45,52 @@ func newGenerator(request *pluginpb.CodeGeneratorRequest) *generator {
 }
 
 func (g *generator) generate() error {
-	for _, name := range g.request.FileToGenerate {
-		file, ok := g.files[name]
-		if !ok {
-			return fmt.Errorf("%w: %q", errFileToGenerateNotFound, name)
-		}
-		if err := g.addFile(file); err != nil {
-			return fmt.Errorf("add file %q: %w", name, err)
-		}
+	ti := indexTypes(g.request.ProtoFile)
+	generatedFiles, err := g.generatedFiles()
+	if err != nil {
+		return err
 	}
+
+	reachable, err := findReachableTypes(ti, generatedFiles)
+	if err != nil {
+		return fmt.Errorf("find reachable types: %w", err)
+	}
+
+	g.addEnums(orderedEnums(ti, g.request.FileToGenerate, generatedFiles, reachable.enums))
+
+	if err := g.addMessages(orderedMessages(ti, g.request.FileToGenerate, generatedFiles, reachable.messages), ti); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (g *generator) addFile(file *descriptorpb.FileDescriptorProto) error {
-	if g.schema.Package == "" {
-		g.schema.Package = file.GetPackage()
+func (g *generator) generatedFiles() (map[string]struct{}, error) {
+	generatedFiles := map[string]struct{}{}
+
+	for _, name := range g.request.FileToGenerate {
+		file, ok := g.files[name]
+		if !ok {
+			return nil, fmt.Errorf("%w: %q", errFileToGenerateNotFound, name)
+		}
+		if g.schema.Package == "" {
+			g.schema.Package = file.GetPackage()
+		}
+		generatedFiles[name] = struct{}{}
 	}
 
-	types := indexFileTypes(file)
-	for _, enum := range types.enums {
+	return generatedFiles, nil
+}
+
+func (g *generator) addEnums(enums []indexedEnum) {
+	for _, enum := range enums {
 		g.schema.Types.Enums = append(g.schema.Types.Enums, buildEnum(enum))
 	}
+}
 
-	for _, message := range types.messages {
-		built, err := g.buildMessage(message, types)
+func (g *generator) addMessages(messages []indexedMessage, ti typeIndex) error {
+	for _, message := range messages {
+		built, err := g.buildMessage(message, ti)
 		if err != nil {
 			return fmt.Errorf("build message %q: %w", message.name, err)
 		}

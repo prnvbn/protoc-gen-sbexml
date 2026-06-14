@@ -1,0 +1,11 @@
+syntax = "proto3";
+package app;
+
+import "shared/types.proto";
+
+message Event {
+  shared.User user = 1;
+  repeated shared.Address previous_addresses = 2;
+  shared.Status status = 3;
+  map<string, shared.Address> address_by_label = 4;
+}
