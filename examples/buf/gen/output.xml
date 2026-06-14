@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" package="examples.trading.v1" id="1" version="0" semanticVersion="0.0.1">
+  <types>
+    <type name="string" primitiveType="char" characterEncoding="UTF-8"></type>
+    <type name="UTCTimestamp" primitiveType="uint64"></type>
+    <composite name="groupSizeEncoding">
+      <type name="blockLength" primitiveType="uint16"></type>
+      <type name="numInGroup" primitiveType="uint16"></type>
+    </composite>
+  </types>
+  <message name="Order" id="1">
+    <field name="id" id="1" type="string"></field>
+    <field name="symbol" id="2" type="string"></field>
+    <field name="venue" id="3" type="string" presence="optional"></field>
+    <field name="created_at" id="4" type="UTCTimestamp" semanticType="UTCTimestamp" epoch="unix" timeUnit="nanosecond"></field>
+    <group name="tags" id="5" dimensionType="groupSizeEncoding">
+      <field name="key" id="1" type="string"></field>
+      <field name="value" id="2" type="string"></field>
+    </group>
+  </message>
+</sbe:messageSchema>

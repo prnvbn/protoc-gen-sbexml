@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package examples.trading.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message Order {
+  string id = 1;
+  string symbol = 2;
+  optional string venue = 3;
+  google.protobuf.Timestamp created_at = 4;
+  map<string, string> tags = 5;
+}
