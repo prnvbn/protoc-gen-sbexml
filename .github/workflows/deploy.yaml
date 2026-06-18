@@ -1,0 +1,28 @@
+name: Build UI
+
+on:
+  push:
+    branches:
+      - main
+    paths: ["ui/**", "internal/**", "go.mod", "go.sum", "version.txt", "wrangler.jsonc", ".github/workflows/deploy.yaml"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Generate UI dist
+        working-directory: ui
+        run: make build

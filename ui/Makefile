@@ -1,9 +1,9 @@
-.PHONY: build clean serve
+.PHONY: build clean serve copy-vendor
 
 GO ?= go
 DIST_DIR := dist
 
-build: $(DIST_DIR)/index.html $(DIST_DIR)/app.js $(DIST_DIR)/loader.js $(DIST_DIR)/styles.css $(DIST_DIR)/vendor $(DIST_DIR)/wasm_exec.js $(DIST_DIR)/main.wasm
+build: $(DIST_DIR)/index.html $(DIST_DIR)/app.js $(DIST_DIR)/loader.js $(DIST_DIR)/styles.css copy-vendor $(DIST_DIR)/version.txt $(DIST_DIR)/wasm_exec.js $(DIST_DIR)/main.wasm
 
 $(DIST_DIR):
 	mkdir -p $(DIST_DIR)
@@ -20,7 +20,10 @@ $(DIST_DIR)/loader.js: loader.js | $(DIST_DIR)
 $(DIST_DIR)/styles.css: styles.css | $(DIST_DIR)
 	cp styles.css $(DIST_DIR)/styles.css
 
-$(DIST_DIR)/vendor: vendor | $(DIST_DIR)
+$(DIST_DIR)/version.txt: ../version.txt | $(DIST_DIR)
+	cp ../version.txt $(DIST_DIR)/version.txt
+
+copy-vendor: | $(DIST_DIR)
 	rm -rf $(DIST_DIR)/vendor
 	cp -R vendor $(DIST_DIR)/vendor
 
