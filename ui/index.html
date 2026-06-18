@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Proto to SBE XML</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch {}
+    </script>
+    <link rel="stylesheet" href="vendor/codemirror/lib/codemirror.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="wasm_exec.js"></script>
+    <script src="vendor/codemirror/lib/codemirror.min.js"></script>
+    <script src="vendor/codemirror/mode/protobuf/protobuf.min.js"></script>
+    <script src="vendor/codemirror/mode/xml/xml.min.js"></script>
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Proto to SBE XML</h1>
+        <p>protoc-gen-sbexml</p>
+      </div>
+      <div class="actions" aria-label="Actions">
+        <button id="sample-button" type="button">Sample</button>
+        <button id="copy-button" type="button">Copy XML</button>
+        <button id="convert-button" class="primary" type="button">Generate</button>
+        <label class="theme-toggle" for="theme-toggle">
+          <span>Dark</span>
+          <input id="theme-toggle" type="checkbox" checked>
+        </label>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="pane" aria-labelledby="proto-label">
+        <div class="pane-header">
+          <h2 id="proto-label">Proto</h2>
+          <span>input.proto</span>
+        </div>
+        <div class="editor-shell">
+          <textarea id="proto-input" spellcheck="false"></textarea>
+        </div>
+      </section>
+
+      <section class="pane" aria-labelledby="xml-label">
+        <div class="pane-header">
+          <h2 id="xml-label">SBE XML</h2>
+          <span>output.xml</span>
+        </div>
+        <div class="editor-shell">
+          <textarea id="xml-output" spellcheck="false"></textarea>
+        </div>
+      </section>
+    </main>
+
+    <footer class="statusbar">
+      <span id="status" data-tone="idle">Loading</span>
+    </footer>
+  </body>
+</html>
